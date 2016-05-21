@@ -1,0 +1,23 @@
+.keSlider {
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+}
+.keSlider__wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+.keSlider__wrapper:after {
+    content: '';
+    clear: both;
+    display: block;
+}
+.keSlider__item {
+    float: left;
+}
+.keSlider__item img {
+    display: block;
+    width: 100%;
+    height: auto;
+}

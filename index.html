@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>keSlider demo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.1.1/normalize.css">
+    <link rel="stylesheet" href="keSlider.css">
+</head>
+<body>
+
+    <div class="keSlider">
+        <div class="keSlider__item">
+            <img src="http://placehold.it/1920x1080" alt="">
+        </div>
+        <div class="keSlider__item">
+            <img src="http://placehold.it/1920x1080?text=test" alt="">
+        </div>
+    </div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.3/jquery.min.js"></script>
+<script src="keSlider.js"></script>
+<script>
+    var slider = $('.keSlider').keSlider();
+    console.log(slider)
+</script>
+</body>
+</html>
