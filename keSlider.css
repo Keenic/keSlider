@@ -31,6 +31,7 @@
     top: 50%;
     background: transparent;
     border: 0;
+    transform: translateY(-50%);
 }
 .keSlider__arrow--left {
     left: 0;
