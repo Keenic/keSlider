@@ -25,7 +25,9 @@
     keSlider.prototype.defaults = {
         carousel: false,
         arrows: true,
-        navigation: true
+        navigation: true,
+        perSlide: 1,
+        perMove: 1
     };
 
     keSlider.prototype.init = function() {
@@ -77,12 +79,16 @@
     };
     
     keSlider.prototype.cloneItems = function() {
-        this.cloneItem(0, false);
-        this.cloneItem(this.originalItems.length - 1, true);
+        for(var i = 0; i < this.options.perSlide; i++) {
+            this.cloneItem(i, false);
+        }
+        for(var j = this.originalItems.length - 1; j > this.originalItems.length - 1 - this.options.perSlide; j--) {
+            this.cloneItem(j, true);
+        }
 
         this.items = this.itemsWrapper.find('.keSlider__item');
 
-        this.moveTo(null, 1, true);
+        this.moveTo(null, this.options.perSlide, true);
     };
 
     keSlider.prototype.cloneItem = function(index, before) {
@@ -104,17 +110,17 @@
     };
 
     keSlider.prototype.setItemsWidth = function() {
-        var _this = this;
+        var slideWidth = this.containerWidth / this.options.perSlide;
 
         this.items.each(function() {
             var item = $(this);
 
-            item.width(_this.containerWidth);
+            item.width(slideWidth);
         });
     };
 
     keSlider.prototype.setWrapperWidth = function() {
-        var wrapperWidth = this.containerWidth * this.items.length;
+        var wrapperWidth = (this.containerWidth / this.options.perSlide) * this.items.length;
 
         this.itemsWrapper.width(wrapperWidth);
     };
@@ -148,7 +154,12 @@
 
     keSlider.prototype.moveTo = function(event, index, instant) {
         var _this = this;
-        var position = index * this.containerWidth * -1;
+        if (index > this.originalItems.length + this.options.perMove + (this.options.perSlide - this.options.perMove)) {
+            index = this.originalItems.length + this.options.perMove + (this.options.perSlide - this.options.perMove);
+        } else if (this.activeSlide > index && index < this.options.perSlide && this.activeSlide > this.options.perSlide) {
+            index = this.options.perSlide;
+        }
+        var position = index * (this.containerWidth / this.options.perSlide) * -1;
 
         if (index >= 0 && index < this.items.length) {
             if (instant) {
@@ -164,10 +175,12 @@
                     _this.activeSlide = index;
                     _this.setCurrentNavigation();
 
-                    if (index > _this.originalItems.length) {
-                        _this.moveTo(null, 1, true);
-                    } else if (index < 1) {
-                        _this.moveTo(null, _this.originalItems.length, true);
+                    if (_this.items.eq(index).hasClass('keSlider__item--clone')) {
+                        if (index - _this.originalItems.length >= _this.options.perSlide) {
+                            _this.moveTo(null, index - _this.originalItems.length, true);
+                        } else {
+                            _this.moveTo(null, index + _this.originalItems.length, true);
+                        }
                     }
                 });
             }
@@ -175,11 +188,11 @@
     };
 
     keSlider.prototype.nextSlide = function() {
-        this.moveTo(null, this.activeSlide + 1);
+        this.moveTo(null, this.activeSlide +  this.options.perMove);
     };
 
     keSlider.prototype.prevSlide = function() {
-        this.moveTo(null, this.activeSlide - 1);
+        this.moveTo(null, this.activeSlide -  this.options.perMove);
     };
 
     keSlider.prototype.createControlsWrapper = function() {
@@ -225,7 +238,9 @@
     keSlider.prototype.navigations = function() {
         this.createNavigation();
         this.activeNavigation();
-        this.setCurrentNavigation();
+        if (!this.options.carousel) {
+            this.setCurrentNavigation();
+        }
     };
 
     keSlider.prototype.createNavigation = function() {
@@ -234,7 +249,7 @@
         var navigationsWrapper = $('<div class="keSlider__navigations-wrapper" />');
         this.navigation = $('<ul class="keSlider__navigations" />');
 
-        for(var i = 0; i < this.originalItems.length; i++) {
+        for(var i = 0; i < this.originalItems.length / this.options.perMove; i++) {
             var navItem = $('<li class="keSlider__navigation-item"><a href="#" class="keSlider__navigation-link" /></li>');
             this.navigation.append(navItem);
         }
@@ -249,9 +264,9 @@
             event.preventDefault();
 
             var link = $(this);
-            var navigationIndex = link.parent().index();
+            var navigationIndex = link.parent().index() * _this.options.perMove;
             if (_this.options.carousel) {
-                navigationIndex++;
+                navigationIndex = navigationIndex + _this.options.perSlide;
             }
 
             if (navigationIndex !== _this.activeSlide) {
@@ -261,10 +276,11 @@
     };
 
     keSlider.prototype.setCurrentNavigation = function() {
-        var activeSlide = this.activeSlide;
+        var activeSlide = Math.ceil(this.activeSlide / this.options.perMove);
         if (this.options.carousel) {
-            activeSlide = this.activeSlide - 1;
+            activeSlide = (this.activeSlide - this.options.perSlide) / this.options.perMove;
         }
+
         this.navigation.find('a').removeClass('keSlider__navigation-link--active');
         this.navigation.find('li').eq(activeSlide).find('a').addClass('keSlider__navigation-link--active');
     };
