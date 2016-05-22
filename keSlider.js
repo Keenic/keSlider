@@ -7,6 +7,8 @@
         this.container = $(container);
         this.items = this.container.find('.keSlider__item');
         this.containerWidth = this.container.width();
+        this.options = {};
+        $.extend(this.options, this.defaults, options);
 
         this.init();
 
@@ -18,6 +20,11 @@
             _this.setHeights();
         });
     }
+
+    keSlider.prototype.defaults = {
+        arrows: true,
+        navigation: true
+    };
 
     keSlider.prototype.init = function() {
         var _this = this;
@@ -49,8 +56,13 @@
         this.setItemsWidth();
         this.setWrapperWidth();
         this.setHeights();
-        this.arrows();
-        this.navigations();
+
+        if (this.options.arrows) {
+            this.arrows();
+        }
+        if (this.options.navigation) {
+            this.navigations();
+        }
 
         this.container.on('keSlider.moveTo', this.moveTo.bind(this));
         this.container.on('keSlider.nextSlide', this.nextSlide.bind(this));
@@ -178,6 +190,8 @@
     };
 
     keSlider.prototype.createNavigation = function() {
+        this.createControlsWrapper();
+        
         var navigationsWrapper = $('<div class="keSlider__navigations-wrapper" />');
         this.navigation = $('<ul class="keSlider__navigations" />');
 
