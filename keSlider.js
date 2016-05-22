@@ -18,6 +18,7 @@
             _this.setItemsWidth();
             _this.setWrapperWidth();
             _this.setHeights();
+            _this.moveTo(null, _this.activeSlide, true);
         });
     }
 
