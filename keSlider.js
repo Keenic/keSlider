@@ -27,7 +27,8 @@
         arrows: true,
         navigation: true,
         perSlide: 1,
-        perMove: 1
+        perMove: 1,
+        animationTime: 400
     };
 
     keSlider.prototype.init = function() {
@@ -163,15 +164,13 @@
 
         if (index >= 0 && index < this.items.length) {
             if (instant) {
-                this.itemsWrapper.css('left', position);
+                this.animateSlide(this.itemsWrapper, position, true);
                 this.activeSlide = index;
                 if (this.options.navigation) {
                     this.setCurrentNavigation();
                 }
             } else {
-                this.itemsWrapper.animate({
-                    left: position
-                }, function () {
+                this.animateSlide(this.itemsWrapper, position, false, function () {
                     _this.activeSlide = index;
                     _this.setCurrentNavigation();
 
@@ -183,6 +182,48 @@
                         }
                     }
                 });
+            }
+        }
+    };
+
+    keSlider.prototype.animateSlide = function(element, position, instant, cb) {
+        var currentPosition = parseFloat(this._getTransform(element)[0]);
+        var distance = position - currentPosition;
+        this.animationStartTime = null;
+
+        if (instant) {
+            element.css('transform', 'translate3d(' + position + 'px, 0, 0)');
+
+            if (typeof cb !== 'undefined') {
+                cb.call(this);
+            }
+        } else {
+            requestAnimationFrame(this.renderAnimation.bind(this, element, currentPosition, distance, cb));
+        }
+    };
+
+    keSlider.prototype.renderAnimation = function(element, originalPosition, distance, cb, time) {
+        if (!this.animationStartTime) {
+            this.animationStartTime = time;
+        }
+
+        var progressTime = time - this.animationStartTime;
+        var timePassed = progressTime / this.options.animationTime;
+        if (timePassed > 1) {
+            timePassed = 1;
+        }
+
+        var newPosition = (distance * timePassed) + originalPosition;
+
+        element.css('transform', 'translate3d(' + newPosition + 'px, 0, 0)');
+
+        if (timePassed < 1) {
+            requestAnimationFrame(this.renderAnimation.bind(this, element, originalPosition, distance, cb));
+        } else {
+            this.animationStartTime = null;
+
+            if (typeof cb !== 'undefined') {
+                cb.call(this);
             }
         }
     };
@@ -283,6 +324,16 @@
 
         this.navigation.find('a').removeClass('keSlider__navigation-link--active');
         this.navigation.find('li').eq(activeSlide).find('a').addClass('keSlider__navigation-link--active');
+    };
+
+    keSlider.prototype._getTransform = function(element) {
+        var results = element.css('transform').match(/matrix(?:(3d)\(-{0,1}\d+\.?\d*(?:, -{0,1}\d+\.?\d*)*(?:, (-{0,1}\d+\.?\d*))(?:, (-{0,1}\d+\.?\d*))(?:, (-{0,1}\d+\.?\d*)), -{0,1}\d+\.?\d*\)|\(-{0,1}\d+\.?\d*(?:, -{0,1}\d+\.?\d*)*(?:, (-{0,1}\d+\.?\d*))(?:, (-{0,1}\d+\.?\d*))\))/);
+
+        if(!results) return [0, 0, 0];
+        if(results[1] == '3d') return results.slice(2,5);
+
+        results.push(0);
+        return results.slice(5, 8);
     };
 
     $.fn.keSlider = function (options) {
