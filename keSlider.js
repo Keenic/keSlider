@@ -165,6 +165,12 @@
 
     keSlider.prototype.moveTo = function(event, index, moveTime) {
         var _this = this;
+        if (this.options.arrows) {
+            this.disableArrows();
+        }
+        if (this.options.navigation) {
+            this.disableNavigation();
+        }
         if (index > this.originalItems.length + this.options.perMove + (this.options.perSlide - this.options.perMove)) {
             index = this.originalItems.length + this.options.perMove + (this.options.perSlide - this.options.perMove);
         } else if (this.activeSlide > index && index < this.options.perSlide && this.activeSlide > this.options.perSlide) {
@@ -176,14 +182,22 @@
             if (moveTime === 0) {
                 this.animateSlide(this.itemsWrapper, position, true);
                 this.activeSlide = index;
+                if (this.options.arrows) {
+                    this.activeArrows();
+                }
                 if (this.options.navigation) {
                     this.setCurrentNavigation();
+                    this.activeNavigation();
                 }
             } else {
                 this.animateSlide(this.itemsWrapper, position, false, moveTime, function () {
                     _this.activeSlide = index;
-                    if (this.options.navigation) {
+                    if (_this.options.arrows) {
+                        _this.activeArrows();
+                    }
+                    if (_this.options.navigation) {
                         _this.setCurrentNavigation();
+                        _this.activeNavigation();
                     }
 
                     if (_this.items.eq(index).hasClass('keSlider__item--clone')) {
@@ -260,6 +274,17 @@
     };
 
     keSlider.prototype.arrows = function() {
+        this.clickPrevSlide = function(event) {
+            event.preventDefault();
+
+            this.prevSlide();
+        }.bind(this);
+        this.clickNextSlide = function(event) {
+            event.preventDefault();
+
+            this.nextSlide();
+        }.bind(this);
+
         this.createArrows();
         this.activeArrows();
     };
@@ -277,21 +302,31 @@
     };
 
     keSlider.prototype.activeArrows = function() {
-        this.arrowLeft.on('click', function(event) {
-            event.preventDefault();
+        this.arrowLeft.on('click', this.clickPrevSlide);
+        this.arrowRight.on('click', this.clickNextSlide);
+    };
 
-            this.prevSlide();
-        }.bind(this));
-
-
-        this.arrowRight.on('click', function(event) {
-            event.preventDefault();
-
-            this.nextSlide();
-        }.bind(this));
+    keSlider.prototype.disableArrows = function() {
+        this.arrowLeft.off('click', this.clickPrevSlide);
+        this.arrowRight.off('click', this.clickNextSlide);
     };
 
     keSlider.prototype.navigations = function() {
+        var _this = this;
+        this.activeNavigationClick = function(event) {
+            event.preventDefault();
+
+            var link = $(this);
+            var navigationIndex = link.parent().index() * _this.options.perMove;
+            if (_this.options.carousel) {
+                navigationIndex = navigationIndex + _this.options.perSlide;
+            }
+
+            if (navigationIndex !== _this.activeSlide) {
+                _this.moveTo(null, navigationIndex, _this.options.animationStartTime);
+            }
+        };
+
         this.createNavigation();
         this.activeNavigation();
         if (!this.options.carousel) {
@@ -315,20 +350,11 @@
     };
 
     keSlider.prototype.activeNavigation = function() {
-        var _this = this;
-        this.controlsWrapper.find('.keSlider__navigation-link').click(function(event) {
-            event.preventDefault();
+        this.controlsWrapper.find('.keSlider__navigation-link').on('click', this.activeNavigationClick);
+    };
 
-            var link = $(this);
-            var navigationIndex = link.parent().index() * _this.options.perMove;
-            if (_this.options.carousel) {
-                navigationIndex = navigationIndex + _this.options.perSlide;
-            }
-
-            if (navigationIndex !== _this.activeSlide) {
-                _this.moveTo(null, navigationIndex, _this.options.animationStartTime);
-            }
-        });
+    keSlider.prototype.disableNavigation = function() {
+        this.controlsWrapper.find('.keSlider__navigation-link').off('click', this.activeNavigationClick);
     };
 
     keSlider.prototype.setCurrentNavigation = function() {
