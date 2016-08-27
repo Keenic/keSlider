@@ -33,7 +33,9 @@
         animationTime: 400,
         touch: true,
         changeSlidePosition: 20,
-        responsive: false
+        responsive: false,
+        autoPlay: false,
+        autoDelay: 5000
     };
 
     keSlider.prototype.init = function() {
@@ -96,6 +98,12 @@
             this.deleteTouch();
         }
 
+        if (this.options.autoPlay) {
+            this.startAutoMove();
+        } else {
+            this.stopAutoMove();
+        }
+        
         if (firstTime) {
             this.container.on('keSlider.moveTo', this.moveTo.bind(this));
             this.container.on('keSlider.nextSlide', this.nextSlide.bind(this));
@@ -211,6 +219,9 @@
         if (this.options.navigation) {
             this.disableNavigation();
         }
+        if (this.options.autoPlay) {
+            this.stopAutoMove();
+        }
         if (index > this.originalItems.length + this.options.perMove + (this.options.perSlide - this.options.perMove)) {
             index = this.originalItems.length + this.options.perMove + (this.options.perSlide - this.options.perMove);
         } else if (this.activeSlide > index && index < this.options.perSlide && this.activeSlide > this.options.perSlide) {
@@ -229,6 +240,9 @@
                     this.setCurrentNavigation();
                     this.activeNavigation();
                 }
+                if (this.options.autoPlay) {
+                    this.startAutoMove();
+                }
             } else {
                 this.animateSlide(this.itemsWrapper, position, false, moveTime, function () {
                     _this.activeSlide = index;
@@ -238,6 +252,9 @@
                     if (_this.options.navigation) {
                         _this.setCurrentNavigation();
                         _this.activeNavigation();
+                    }
+                    if (_this.options.autoPlay) {
+                        _this.startAutoMove();
                     }
 
                     if (_this.items.eq(index).hasClass('keSlider__item--clone')) {
@@ -520,6 +537,15 @@
                 this.moveTo(null, this.activeSlide, 100);
             }
         }
+    };
+
+    keSlider.prototype.startAutoMove = function() {
+        clearInterval(this.autoChange);
+        this.autoChange = setInterval(this.nextSlide.bind(this), this.options.autoDelay);
+    };
+
+    keSlider.prototype.stopAutoMove = function() {
+        clearInterval(this.autoChange);
     };
 
     keSlider.prototype._getTransform = function(element) {
