@@ -108,6 +108,10 @@
             this.container.on('keSlider.moveTo', this.moveTo.bind(this));
             this.container.on('keSlider.nextSlide', this.nextSlide.bind(this));
             this.container.on('keSlider.prevSlide', this.prevSlide.bind(this));
+            this.container.on('keSlider.autoStop', this.stopAutoMove.bind(this));
+            this.container.on('keSlider.autoPlay', this.startAutoMove.bind(this));
+
+            this.container.trigger('keSlider.initialized');
         }
     };
 
@@ -243,26 +247,30 @@
                 if (this.options.autoPlay) {
                     this.startAutoMove();
                 }
+                
+                this.container.trigger('keSlider.slideChanged', this.activeSlide);
             } else {
                 this.animateSlide(this.itemsWrapper, position, false, moveTime, function () {
-                    _this.activeSlide = index;
-                    if (_this.options.arrows) {
-                        _this.activeArrows();
-                    }
-                    if (_this.options.navigation) {
-                        _this.setCurrentNavigation();
-                        _this.activeNavigation();
-                    }
-                    if (_this.options.autoPlay) {
-                        _this.startAutoMove();
-                    }
-
                     if (_this.items.eq(index).hasClass('keSlider__item--clone')) {
                         if (index - _this.originalItems.length >= _this.options.perSlide) {
                             _this.moveTo(null, index - _this.originalItems.length, 0);
                         } else {
                             _this.moveTo(null, index + _this.originalItems.length, 0);
                         }
+                    } else {
+                        _this.activeSlide = index;
+                        if (_this.options.arrows) {
+                            _this.activeArrows();
+                        }
+                        if (_this.options.navigation) {
+                            _this.setCurrentNavigation();
+                            _this.activeNavigation();
+                        }
+                        if (_this.options.autoPlay) {
+                            _this.startAutoMove();
+                        }
+
+                        _this.container.trigger('keSlider.slideChanged', _this.activeSlide);
                     }
                 });
             }
