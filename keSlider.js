@@ -68,12 +68,12 @@
 
         this.checkResponsiveOptions();
 
-        if (this.options.arrows) {
+        if (this.options.arrows && this.originalItems.length > 1) {
             this.arrows();
         } else {
             this.deleteArrows();
         }
-        if (this.options.navigation) {
+        if (this.options.navigation && this.originalItems.length > 1) {
             this.navigations();
         } else {
             this.deleteNavigation();
