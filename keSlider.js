@@ -35,7 +35,9 @@
         changeSlidePosition: 20,
         responsive: false,
         autoPlay: false,
-        autoDelay: 5000
+        autoDelay: 5000,
+        arrowLeftText: 'Prev',
+        arrowRightText: 'Next'
     };
 
     keSlider.prototype.init = function() {
@@ -359,8 +361,8 @@
     keSlider.prototype.createArrows = function() {
         this.createControlsWrapper();
 
-        this.arrowLeft = $('<button class="keSlider__arrow keSlider__arrow--left">Prev</button>');
-        this.arrowRight = $('<button class="keSlider__arrow keSlider__arrow--right">Next</button>');
+        this.arrowLeft = $('<button class="keSlider__arrow keSlider__arrow--left">' + this.options.arrowLeftText + '</button>');
+        this.arrowRight = $('<button class="keSlider__arrow keSlider__arrow--right">' + this.options.arrowRightText + '</button>');
 
         var arrowsContrainer = $('<div class="keSlider__arrows-container" />');
         arrowsContrainer.append(this.arrowLeft).append(this.arrowRight);
